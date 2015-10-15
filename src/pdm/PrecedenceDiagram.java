@@ -83,7 +83,7 @@ public class PrecedenceDiagram {
 				if (dependency.getDuration() > earliestStart)
 					earliestStart = dependency.getEarliestFinish();
 			}
-			
+
 			task.setEarliestStart(earliestStart);
 		}
 	}
@@ -94,7 +94,11 @@ public class PrecedenceDiagram {
 	}
 
 	public void generateLatestStartTimes() {
-
+		for (Task task : getTasks()) {
+			task.setLatestStart(task.getLatestFinish() - task.getDuration());
+			if (task.getLatestStart() < 0)
+				task.setLatestStart(0);
+		}
 	}
 
 	public void generateLatestFinishTimes() {
