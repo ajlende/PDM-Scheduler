@@ -1,5 +1,6 @@
 package pdm;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Task {
@@ -11,6 +12,7 @@ public class Task {
 	private int latestStart;
 	private int latestFinish;
 	private Set<Task> dependencies;
+	private Set<Task> nextTasks;
 	private boolean isCompleted;
 
 	public Task(String name, int duration, Set<Task> dependencies) {
@@ -21,6 +23,7 @@ public class Task {
 		this.latestStart = 0;
 		this.latestFinish = 0;
 		this.dependencies = dependencies;
+		this.nextTasks = new HashSet<Task>();
 		this.isCompleted = false;
 	}
 
@@ -40,9 +43,9 @@ public class Task {
 			}
 		} else
 			builder.append("No dependencies.");
-		
+
 		builder.append("\n");
-		return builder.toString(); // TODO
+		return builder.toString();
 	}
 
 	public String getName() {
@@ -99,6 +102,18 @@ public class Task {
 
 	public void setDependencies(Set<Task> dependencies) {
 		this.dependencies = dependencies;
+	}
+
+	public Set<Task> getNextTasks() {
+		return nextTasks;
+	}
+
+	public void addNextTask(Task nextTask) {
+		this.nextTasks.add(nextTask);
+	}
+
+	public void removeNextTask(Task nextTask) {
+		this.nextTasks.remove(nextTask);
 	}
 
 	public void addDependency(Task dependency) {
