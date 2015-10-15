@@ -102,7 +102,21 @@ public class PrecedenceDiagram {
 	}
 
 	public void generateLatestFinishTimes() {
-
+		for (Task task : getTasks()) {
+			if (task.getNextTasks().size() > 0) {
+				int currentLatestFinish = -1; // starting point, guaranteed to be replaced
+				for (Task nextTask : task.getNextTasks()) {
+					if (currentLatestFinish == -1) // is the first task in the set of next tasks
+						currentLatestFinish = nextTask.getLatestStart();
+					else {
+						if (nextTask.getLatestStart() < currentLatestFinish)
+							currentLatestFinish = nextTask.getLatestStart();
+					}
+				}
+				task.setLatestFinish(currentLatestFinish);
+			} else // doesn't have any next tasks, is a final task
+				task.setLatestFinish(task.getEarliestFinish());
+		}
 	}
 
 	public Set<Task> getCriticalPaths() {
