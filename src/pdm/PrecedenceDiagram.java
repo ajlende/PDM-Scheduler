@@ -8,7 +8,6 @@ public class PrecedenceDiagram {
 
 	private Set<Task> tasks;
 
-
 	public PrecedenceDiagram(Set<Task> tasks) {
 		this.tasks = tasks;
 	}
@@ -31,13 +30,13 @@ public class PrecedenceDiagram {
 			if (task.getName().equals(name))
 				return task;
 		}
-		
+
 		return null; // not found
 	}
 
 	public Set<Task> parseDependencies(String dependencyString) {
 		Set<Task> dependencies = new HashSet<>();
-		for (char ch: dependencyString.toCharArray()) {
+		for (char ch : dependencyString.toCharArray()) {
 			dependencies.add(this.findTask(Character.toString(ch)));
 		}
 		return dependencies;
@@ -76,6 +75,11 @@ public class PrecedenceDiagram {
 		}
 	}
 
+	/**
+	 * This is called first. Assigns the greatest earliest finish of this task's
+	 * dependencies. If this task has no dependencies (i.e. is a "first" task in
+	 * the PDM), the earliest start is assigned to 0.
+	 */
 	public void generateEarliestStartTimes() {
 		for (Task task : getTasks()) {
 			int earliestStart = 0;
@@ -88,6 +92,10 @@ public class PrecedenceDiagram {
 		}
 	}
 
+	/**
+	 * This is called second. Assigns the earliest finish of this task to be the
+	 * sum of its earliest start and its duration.
+	 */
 	public void generateEarliestFinishTimes() {
 		for (Task task : getTasks())
 			task.setEarliestFinish(task.getEarliestStart() + task.getDuration());
@@ -100,13 +108,15 @@ public class PrecedenceDiagram {
 				task.setLatestStart(0);
 		}
 	}
-
+	
 	public void generateLatestFinishTimes() {
 		for (Task task : getTasks()) {
 			if (task.getNextTasks().size() > 0) {
-				int currentLatestFinish = -1; // starting point, guaranteed to be replaced
+				int currentLatestFinish = -1; // starting point, guaranteed to
+												// be replaced
 				for (Task nextTask : task.getNextTasks()) {
-					if (currentLatestFinish == -1) // is the first task in the set of next tasks
+					if (currentLatestFinish == -1) // is the first task in the
+													// set of next tasks
 						currentLatestFinish = nextTask.getLatestStart();
 					else {
 						if (nextTask.getLatestStart() < currentLatestFinish)
