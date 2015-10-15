@@ -55,9 +55,9 @@ public class PrecedenceDiagram {
 
 				// use comma as separator
 				String[] taskFields = line.split(cvsSplitBy);
-				Set<Task> dependancies = this.parseDependencies(taskFields[2]);
-				Task task = new Task(taskFields[0], Integer.parseInt(taskFields[1]), dependancies);
-				this.tasks.add(task);
+				Set<Task> dependencies = this.parseDependencies(taskFields[2]);
+				Task task = new Task(taskFields[0], Integer.parseInt(taskFields[1]), dependencies);
+				this.addTask(task);
 
 			}
 

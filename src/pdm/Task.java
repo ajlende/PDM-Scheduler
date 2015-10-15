@@ -35,8 +35,9 @@ public class Task {
 		builder.append("Latest finish: " + getLatestFinish() + "\n");
 		if (getDependencies().size() > 0) {
 			builder.append("Dependencies: ");
-			for (int i = 0; i < getDependencies().size(); i++)
-				builder.append(getDependencies().get(i).getName() + " ");
+			for (Task dep : getDependencies()) {
+				builder.append(dep.getName() + " ");
+			}
 		} else
 			builder.append("No dependencies.");
 		
