@@ -11,6 +11,7 @@ public class Task {
 	private int latestStart;
 	private int latestFinish;
 	private List<Task> dependencies;
+	private boolean isCompleted;
 	
 	public Task(String name, List<Task> dependencies) {
 		this.setName(name);
@@ -75,5 +76,13 @@ public class Task {
 	
 	public void removeDependency(Task dependency) {
 		this.dependencies.remove(dependency);
+	}
+	
+	public boolean isCompleted() {
+		return isCompleted;
+	}
+	
+	public void setIsCompleted(boolean isCompleted) {
+		this.isCompleted = isCompleted;
 	}
 }
