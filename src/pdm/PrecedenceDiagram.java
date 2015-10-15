@@ -76,18 +76,35 @@ public class PrecedenceDiagram {
 		}
 	}
 
-	public void generateEarlyTimes() {
+	public void generateEarliestStartTimes() {
+		for (Task task : getTasks()) {
+			int earliestStart = 0;
+			for (Task dependency : task.getDependencies()) {
+				if (dependency.getDuration() > earliestStart)
+					earliestStart = dependency.getDuration();
+			}
+			
+			task.setEarliestStart(earliestStart);
+		}
+	}
+
+	public void generateEarliestFinishTimes() {
+		for (Task task : getTasks())
+			task.setEarliestFinish(task.getEarliestStart() + task.getDuration());
+	}
+
+	public void generateLatestStartTimes() {
 
 	}
 
-	public void generateLateTimes() {
+	public void generateLatestFinishTimes() {
 
 	}
 
 	public Set<Task> getCriticalPaths() {
 		return null;
 	}
-	
+
 	public Set<Task> getTasks() {
 		return tasks;
 	}
