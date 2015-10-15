@@ -3,6 +3,6 @@ package pdm;
 public class Main {
 
     public static void main(String[] args) {
-	// write your code here
+    	PrecedenceDiagram pdm = new PrecedenceDiagram(args[0]);
     }
 }

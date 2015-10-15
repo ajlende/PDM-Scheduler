@@ -3,7 +3,7 @@ package pdm;
 import java.util.List;
 
 public class Task {
-	
+
 	private String name;
 	private int duration;
 	private int earliestStart;
@@ -12,10 +12,31 @@ public class Task {
 	private int latestFinish;
 	private List<Task> dependencies;
 	private boolean isCompleted;
-	
-	public Task(String name, List<Task> dependencies) {
+
+	public Task(String name, String duration, List<Task> dependencies) {
 		this.setName(name);
+		this.setDuration(Integer.parseInt(duration));
 		this.dependencies = dependencies;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Task " + getName() + "\n");
+		builder.append("Duration: " + getDuration() + "\n");
+		builder.append("Earliest start: " + getEarliestStart() + "\n");
+		builder.append("Earliest finish: " + getEarliestFinish() + "\n");
+		builder.append("Latest start: " + getLatestStart() + "\n");
+		builder.append("Latest finish: " + getLatestFinish() + "\n");
+		if (getDependencies().size() > 0) {
+			builder.append("Dependencies: ");
+			for (int i = 0; i < getDependencies().size(); i++)
+				builder.append(getDependencies().get(i).getName() + " ");
+		} else
+			builder.append("No dependencies.");
+		
+		builder.append("\n");
+		return builder.toString(); // TODO
 	}
 
 	public String getName() {
@@ -65,23 +86,23 @@ public class Task {
 	public void setLatestFinish(int latestFinish) {
 		this.latestFinish = latestFinish;
 	}
-	
+
 	public List<Task> getDependencies() {
 		return dependencies;
 	}
-	
+
 	public void addDependency(Task dependency) {
 		this.dependencies.add(dependency);
 	}
-	
+
 	public void removeDependency(Task dependency) {
 		this.dependencies.remove(dependency);
 	}
-	
+
 	public boolean isCompleted() {
 		return isCompleted;
 	}
-	
+
 	public void setIsCompleted(boolean isCompleted) {
 		this.isCompleted = isCompleted;
 	}
