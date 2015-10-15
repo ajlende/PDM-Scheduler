@@ -81,7 +81,7 @@ public class PrecedenceDiagram {
 			int earliestStart = 0;
 			for (Task dependency : task.getDependencies()) {
 				if (dependency.getDuration() > earliestStart)
-					earliestStart = dependency.getDuration();
+					earliestStart = dependency.getEarliestFinish();
 			}
 			
 			task.setEarliestStart(earliestStart);
