@@ -27,7 +27,12 @@ public class PrecedenceDiagram {
 	}
 
 	public Task findTask(String name) {
-		return null;
+		for (Task task : getTasks()) {
+			if (task.getName().equals(name))
+				return task;
+		}
+		
+		return null; // not found
 	}
 
 	public void readTasks(String csvFile) {
@@ -64,6 +69,10 @@ public class PrecedenceDiagram {
 
 	public Set<Task> getCriticalPaths() {
 		return null;
+	}
+	
+	public Set<Task> getTasks() {
+		return tasks;
 	}
 
 	@Override
