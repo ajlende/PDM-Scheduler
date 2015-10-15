@@ -10,16 +10,18 @@ public class Task {
 	private int earliestFinish;
 	private int latestStart;
 	private int latestFinish;
+	private int totalFloat;
 	private Set<Task> dependencies;
 	private boolean isCompleted;
 
 	public Task(String name, int duration, Set<Task> dependencies) {
 		this.name = name;
 		this.duration = duration;
-		this.earliestStart = 0;
-		this.earliestFinish = 0;
-		this.latestStart = 0;
-		this.latestFinish = 0;
+		this.earliestStart = -1;
+		this.earliestFinish = -1;
+		this.latestStart = -1;
+		this.latestFinish = -1;
+		this.totalFloat = -1;
 		this.dependencies = dependencies;
 		this.isCompleted = false;
 	}
@@ -33,6 +35,7 @@ public class Task {
 		builder.append("Earliest finish: " + getEarliestFinish() + "\n");
 		builder.append("Latest start: " + getLatestStart() + "\n");
 		builder.append("Latest finish: " + getLatestFinish() + "\n");
+		builder.append("Total float: " + getTotalFloat() + "\n");
 		if (getDependencies().size() > 0) {
 			builder.append("Dependencies: ");
 			for (Task dep : getDependencies()) {
@@ -115,5 +118,13 @@ public class Task {
 
 	public void setIsCompleted(boolean isCompleted) {
 		this.isCompleted = isCompleted;
+	}
+
+	public int getTotalFloat() {
+		return this.totalFloat;
+	}
+
+	public void setTotalFloat(int totalFloat) {
+		this.totalFloat = totalFloat;
 	}
 }
