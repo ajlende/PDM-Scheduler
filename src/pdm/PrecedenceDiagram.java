@@ -2,27 +2,56 @@ package pdm;
 
 import java.io.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class PrecedenceDiagram {
 
 	private Set<Task> tasks;
+	private List<Set<Task>> criticalPaths;
+	private Boolean dirtyEarlyStart;
+	private Boolean dirtyEarlyFinish;
+	private Boolean dirtyLateStart;
+	private Boolean dirtyLateFinish;
+	private Boolean dirtyTotalFloat;
 
 	public PrecedenceDiagram(Set<Task> tasks) {
+		this.dirtyEarlyStart = true;
+		this.dirtyEarlyFinish = true;
+		this.dirtyLateStart = true;
+		this.dirtyLateFinish = true;
+		this.dirtyTotalFloat = true;
 		this.tasks = tasks;
+		this.generateCriticalPaths();
 	}
 
 	public PrecedenceDiagram(String filename) {
-		tasks = new HashSet<>();
+		this.dirtyEarlyStart = true;
+		this.dirtyEarlyFinish = true;
+		this.dirtyLateStart = true;
+		this.dirtyLateFinish = true;
+		this.dirtyTotalFloat = true;
+		this.tasks = new HashSet<>();
 		this.parseTasks(filename);
+		this.generateCriticalPaths();
 	}
 
 	public void addTask(Task task) {
 		this.tasks.add(task);
+		this.dirtyEarlyStart = true;
+		this.dirtyEarlyFinish = true;
+		this.dirtyLateStart = true;
+		this.dirtyLateFinish = true;
+		this.dirtyTotalFloat = true;
 	}
 
 	public void removeTask(Task task) {
 		this.tasks.remove(task);
+		this.dirtyEarlyStart = true;
+		this.dirtyEarlyFinish = true;
+		this.dirtyLateStart = true;
+		this.dirtyLateFinish = true;
+		this.dirtyTotalFloat = true;
 	}
 
 	public Task findTask(String name) {
@@ -90,6 +119,7 @@ public class PrecedenceDiagram {
 
 			task.setEarliestStart(earliestStart);
 		}
+		this.dirtyEarlyStart = false;
 	}
 
 	/**
@@ -97,19 +127,24 @@ public class PrecedenceDiagram {
 	 * sum of its earliest start and its duration.
 	 */
 	public void generateEarliestFinishTimes() {
+		if (this.dirtyEarlyStart) generateEarliestFinishTimes();
 		for (Task task : getTasks())
 			task.setEarliestFinish(task.getEarliestStart() + task.getDuration());
+		this.dirtyEarlyFinish = false;
 	}
 
 	public void generateLatestStartTimes() {
+		if (this.dirtyLateFinish) this.generateLatestFinishTimes();
 		for (Task task : getTasks()) {
 			task.setLatestStart(task.getLatestFinish() - task.getDuration());
 			if (task.getLatestStart() < 0)
 				task.setLatestStart(0);
 		}
+		this.dirtyLateStart = false;
 	}
 	
 	public void generateLatestFinishTimes() {
+		if (this.dirtyEarlyFinish) generateEarliestFinishTimes();
 		for (Task task : getTasks()) {
 			if (task.getNextTasks().size() > 0) {
 				int currentLatestFinish = -1; // starting point, guaranteed to
@@ -127,10 +162,39 @@ public class PrecedenceDiagram {
 			} else // doesn't have any next tasks, is a final task
 				task.setLatestFinish(task.getEarliestFinish());
 		}
+		this.dirtyLateFinish = false;
 	}
 
-	public Set<Task> getCriticalPaths() {
-		return null;
+	public void generateTimes() {
+		this.generateEarliestStartTimes();
+		this.generateEarliestFinishTimes();
+		this.generateLatestFinishTimes();
+		this.generateLatestStartTimes();
+	}
+
+	public void generateTotalFloat() {
+		if (this.dirtyEarlyStart || this.dirtyLateStart) this.generateTimes();
+		for(Task task : getTasks())
+			task.setTotalFloat(task.getLatestStart() - task.getEarliestStart());
+		this.dirtyTotalFloat = false;
+	}
+
+	private List<Task> recursiveDFS(Task t) {
+		Set<Task> dependencies = t.getDependencies();
+		return null; // TODO
+	}
+
+	public void generateCriticalPaths() {
+		if (this.dirtyTotalFloat) generateTotalFloat();
+		for (Task t : this.tasks) {
+			if (t.getDependencies().isEmpty() && t.getTotalFloat() == 0) {
+				// TODO
+			}
+		}
+	}
+
+	public List<Set<Task>> getCriticalPaths() {
+		return this.criticalPaths;
 	}
 
 	public Set<Task> getTasks() {
