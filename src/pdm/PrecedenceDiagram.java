@@ -2,12 +2,12 @@ package pdm;
 
 import java.io.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class PrecedenceDiagram {
 
 	private Set<Task> tasks;
+
 
 	public PrecedenceDiagram(Set<Task> tasks) {
 		this.tasks = tasks;
@@ -15,7 +15,7 @@ public class PrecedenceDiagram {
 
 	public PrecedenceDiagram(String filename) {
 		tasks = new HashSet<>();
-		this.readTasks(filename);
+		this.parseTasks(filename);
 	}
 
 	public void addTask(Task task) {
@@ -35,7 +35,15 @@ public class PrecedenceDiagram {
 		return null; // not found
 	}
 
-	public void readTasks(String csvFile) {
+	public Set<Task> parseDependencies(String dependencyString) {
+		Set<Task> dependencies = new HashSet<>();
+		for (char ch: dependencyString.toCharArray()) {
+			dependencies.add(this.findTask(Character.toString(ch)));
+		}
+		return dependencies;
+	}
+
+	public void parseTasks(String csvFile) {
 		BufferedReader br = null;
 		String line;
 		String cvsSplitBy = ",";
@@ -47,8 +55,9 @@ public class PrecedenceDiagram {
 
 				// use comma as separator
 				String[] taskFields = line.split(cvsSplitBy);
-				List<Task> dependancies = null;
-				Task task = new Task(taskFields[0], taskFields[1], dependancies);
+				Set<Task> dependancies = this.parseDependencies(taskFields[2]);
+				Task task = new Task(taskFields[0], Integer.parseInt(taskFields[1]), dependancies);
+				this.tasks.add(task);
 
 			}
 
@@ -67,6 +76,14 @@ public class PrecedenceDiagram {
 		}
 	}
 
+	public void generateEarlyTimes() {
+
+	}
+
+	public void generateLateTimes() {
+
+	}
+
 	public Set<Task> getCriticalPaths() {
 		return null;
 	}
@@ -77,6 +94,12 @@ public class PrecedenceDiagram {
 
 	@Override
 	public String toString() {
-		return super.toString();
+		StringBuilder builder = new StringBuilder();
+		for (Task task : this.getTasks()) {
+			builder.append("---------------------\n");
+			builder.append(task.toString() + "\n");
+			builder.append("---------------------\n");
+		}
+		return builder.toString();
 	}
 }

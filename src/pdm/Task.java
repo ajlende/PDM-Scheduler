@@ -1,6 +1,6 @@
 package pdm;
 
-import java.util.List;
+import java.util.Set;
 
 public class Task {
 
@@ -10,13 +10,18 @@ public class Task {
 	private int earliestFinish;
 	private int latestStart;
 	private int latestFinish;
-	private List<Task> dependencies;
+	private Set<Task> dependencies;
 	private boolean isCompleted;
 
-	public Task(String name, String duration, List<Task> dependencies) {
-		this.setName(name);
-		this.setDuration(Integer.parseInt(duration));
+	public Task(String name, int duration, Set<Task> dependencies) {
+		this.name = name;
+		this.duration = duration;
+		this.earliestStart = 0;
+		this.earliestFinish = 0;
+		this.latestStart = 0;
+		this.latestFinish = 0;
 		this.dependencies = dependencies;
+		this.isCompleted = false;
 	}
 
 	@Override
@@ -87,8 +92,12 @@ public class Task {
 		this.latestFinish = latestFinish;
 	}
 
-	public List<Task> getDependencies() {
+	public Set<Task> getDependencies() {
 		return dependencies;
+	}
+
+	public void setDependencies(Set<Task> dependencies) {
+		this.dependencies = dependencies;
 	}
 
 	public void addDependency(Task dependency) {
