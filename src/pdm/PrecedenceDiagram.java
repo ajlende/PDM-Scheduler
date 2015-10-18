@@ -101,6 +101,10 @@ public class PrecedenceDiagram {
 			task.setEarliestFinish(task.getEarliestStart() + task.getDuration());
 	}
 
+	/**
+	 * This is called fourth and last. Assigns the task's latest start to be the
+	 * latest finish minus the duration of the task.
+	 */
 	public void generateLatestStartTimes() {
 		for (Task task : getTasks()) {
 			task.setLatestStart(task.getLatestFinish() - task.getDuration());
@@ -108,7 +112,12 @@ public class PrecedenceDiagram {
 				task.setLatestStart(0);
 		}
 	}
-	
+
+	/**
+	 * This is called third. Assigns the latest finish time of the task to the
+	 * smallest latest start of this task's next tasks. Otherwise, if it has no
+	 * next tasks, it is set to the same as the earliest finish.
+	 */
 	public void generateLatestFinishTimes() {
 		for (Task task : getTasks()) {
 			if (task.getNextTasks().size() > 0) {
