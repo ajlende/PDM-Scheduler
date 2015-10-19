@@ -133,6 +133,10 @@ public class PrecedenceDiagram {
 		this.dirtyEarlyFinish = false;
 	}
 
+	/**
+	 * This is called fourth and last. Assigns the task's latest start to be the
+	 * latest finish minus the duration of the task.
+	 */
 	public void generateLatestStartTimes() {
 		if (this.dirtyLateFinish) this.generateLatestFinishTimes();
 		for (Task task : getTasks()) {
@@ -142,7 +146,12 @@ public class PrecedenceDiagram {
 		}
 		this.dirtyLateStart = false;
 	}
-	
+
+	/**
+	 * This is called third. Assigns the latest finish time of the task to the
+	 * smallest latest start of this task's next tasks. Otherwise, if it has no
+	 * next tasks, it is set to the same as the earliest finish.
+	 */
 	public void generateLatestFinishTimes() {
 		if (this.dirtyEarlyFinish) generateEarliestFinishTimes();
 		for (Task task : getTasks()) {
