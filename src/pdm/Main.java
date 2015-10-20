@@ -1,6 +1,7 @@
 package pdm;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class Main {
 
@@ -46,7 +47,10 @@ public class Main {
         pdm.addTask(K);
         pdm.addTask(L);
 
-        pdm.generateCriticalPaths();
+        Set<Task> critical = pdm.getCriticalPaths();
+        System.out.print("Critical Path Tasks: ");
+        for (Task t : critical) System.out.print(t.getName() + " ");
+        System.out.println();
 
         System.out.println(pdm.toString());
     }

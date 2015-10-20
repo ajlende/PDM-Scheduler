@@ -5,11 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PrecedenceDiagram {
 
 	private Set<Task> tasks;
-	private List<Set<Task>> criticalPaths;
+	private Set<Task> criticalPaths;
 	private boolean dirtyEarlyStart;
 	private boolean dirtyEarlyFinish;
 	private boolean dirtyLateStart;
@@ -27,7 +28,7 @@ public class PrecedenceDiagram {
 		this.dirtyCriticalPath = true;
 		this.dirtyFollowing = true;
 		this.tasks = new HashSet<>();
-		this.generateCriticalPaths();
+		this.criticalPaths = new HashSet<>();
 	}
 
 	public PrecedenceDiagram(Set<Task> tasks) {
@@ -39,7 +40,7 @@ public class PrecedenceDiagram {
 		this.dirtyCriticalPath = true;
 		this.dirtyFollowing = true;
 		this.tasks = tasks;
-		this.generateCriticalPaths();
+		this.criticalPaths = new HashSet<>();
 	}
 
 	public PrecedenceDiagram(String filename) {
@@ -51,8 +52,8 @@ public class PrecedenceDiagram {
 		this.dirtyCriticalPath = true;
 		this.dirtyFollowing = true;
 		this.tasks = new HashSet<>();
+		this.criticalPaths = new HashSet<>();
 		this.parseTasks(filename);
-		this.generateCriticalPaths();
 	}
 
 	public void addTask(Task task) {
@@ -118,7 +119,6 @@ public class PrecedenceDiagram {
 		String cvsSplitBy = ",";
 
 		try {
-
 			br = new BufferedReader(new FileReader(csvFile));
 			while ((line = br.readLine()) != null) {
 
@@ -127,7 +127,6 @@ public class PrecedenceDiagram {
 				Set<Task> dependencies = this.parseDependencies(taskFields[2]);
 				Task task = new Task(taskFields[0], Integer.parseInt(taskFields[1]), dependencies);
 				this.addTask(task);
-
 			}
 
 		} catch (FileNotFoundException e) {
@@ -171,7 +170,6 @@ public class PrecedenceDiagram {
 	 */
 	public void generateEarlyTimes() {
 		if (this.dirtyFollowing) this.generateFollowingTasks();
-		System.out.println("Early Times\n-----------");
 		Stack<Task> taskStack;
 		for (Task t : this.getTasks()) {
 			if (t.getPrecedingTasks().isEmpty()) {
@@ -182,15 +180,13 @@ public class PrecedenceDiagram {
 				while(!taskStack.isEmpty()) {
 					Task tmp = taskStack.pop();
 					for (Task u : tmp.getFollowingTasks()) {
-						if (tmp.getEarliestStart() > u.getEarliestFinish()) {
+						if (tmp.getEarliestFinish() > u.getEarliestStart()) {
 							u.setEarliestStart(tmp.getEarliestFinish());
 							u.setEarliestFinish(u.getEarliestStart() + u.getDuration());
 						}
 						taskStack.push(u);
 					}
-					System.out.print(tmp.getName());
 				}
-				System.out.println();
 			}
 		}
 		this.dirtyEarlyFinish = this.dirtyEarlyStart = false;
@@ -201,7 +197,6 @@ public class PrecedenceDiagram {
 	 */
 	private void generateLateTimes() {
 		if (this.dirtyEarlyStart || this.dirtyEarlyFinish) this.generateEarlyTimes();
-		System.out.println("Late Times\n----------");
 		Stack<Task> taskStack;
 		int maxTime = 0;
 		for (Task t : this.getTasks()) {
@@ -224,9 +219,7 @@ public class PrecedenceDiagram {
 						}
 						taskStack.push(u);
 					}
-					System.out.print(tmp.getName());
 				}
-				System.out.println();
 			}
 		}
 		this.dirtyLateStart = this.dirtyLateFinish = false;
@@ -253,19 +246,16 @@ public class PrecedenceDiagram {
 	}
 
 	/**
-	 * Generates the critical paths
+	 * Adds all tasks with a total float of zero to the criticalPaths field
 	 */
 	public void generateCriticalPaths() {
 		if (this.dirtyTotalFloat) generateTotalFloat();
-		for (Task t : this.tasks) {
-			if (t.getPrecedingTasks().isEmpty() && t.getTotalFloat() == 0) {
-				// TODO
-			}
-		}
+		criticalPaths.addAll(this.tasks.stream().filter(t -> t.getTotalFloat() == 0).collect(Collectors.toList()));
 		this.dirtyCriticalPath = false;
 	}
 
-	public List<Set<Task>> getCriticalPaths() {
+	public Set<Task> getCriticalPaths() {
+		if (dirtyCriticalPath) generateCriticalPaths();
 		return this.criticalPaths;
 	}
 
