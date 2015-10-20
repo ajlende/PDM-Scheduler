@@ -94,6 +94,8 @@ public class PrecedenceDiagram {
 			dependencies.add(this.findTask(Character.toString(ch)));
 		}
 		return dependencies;
+		
+		// TODO
 	}
 
 	/**
@@ -130,6 +132,8 @@ public class PrecedenceDiagram {
 				}
 			}
 		}
+		
+		// TODO
 	}
 
 	/**
