@@ -11,19 +11,15 @@ public class PrecedenceDiagram {
 
 	private Set<Task> tasks;
 	private Set<Task> criticalPaths;
-	private boolean dirtyEarlyStart;
-	private boolean dirtyEarlyFinish;
-	private boolean dirtyLateStart;
-	private boolean dirtyLateFinish;
+	private boolean dirtyEarlyTimes;
+	private boolean dirtyLateTimes;
 	private boolean dirtyTotalFloat;
 	private boolean dirtyCriticalPath;
 	private boolean dirtyFollowing;
 
 	public PrecedenceDiagram() {
-		this.dirtyEarlyStart = true;
-		this.dirtyEarlyFinish = true;
-		this.dirtyLateStart = true;
-		this.dirtyLateFinish = true;
+		this.dirtyEarlyTimes = true;
+		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
 		this.dirtyCriticalPath = true;
 		this.dirtyFollowing = true;
@@ -32,10 +28,8 @@ public class PrecedenceDiagram {
 	}
 
 	public PrecedenceDiagram(Set<Task> tasks) {
-		this.dirtyEarlyStart = true;
-		this.dirtyEarlyFinish = true;
-		this.dirtyLateStart = true;
-		this.dirtyLateFinish = true;
+		this.dirtyEarlyTimes = true;
+		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
 		this.dirtyCriticalPath = true;
 		this.dirtyFollowing = true;
@@ -44,10 +38,8 @@ public class PrecedenceDiagram {
 	}
 
 	public PrecedenceDiagram(String filename) {
-		this.dirtyEarlyStart = true;
-		this.dirtyEarlyFinish = true;
-		this.dirtyLateStart = true;
-		this.dirtyLateFinish = true;
+		this.dirtyEarlyTimes = true;
+		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
 		this.dirtyCriticalPath = true;
 		this.dirtyFollowing = true;
@@ -58,10 +50,8 @@ public class PrecedenceDiagram {
 
 	public void addTask(Task task) {
 		this.tasks.add(task);
-		this.dirtyEarlyStart = true;
-		this.dirtyEarlyFinish = true;
-		this.dirtyLateStart = true;
-		this.dirtyLateFinish = true;
+		this.dirtyEarlyTimes = true;
+		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
 		this.dirtyCriticalPath = true;
 		this.dirtyFollowing = true;
@@ -70,10 +60,8 @@ public class PrecedenceDiagram {
 	public void removeTask(Task task) {
 		// TODO Remove links in other tasks
 		this.tasks.remove(task);
-		this.dirtyEarlyStart = true;
-		this.dirtyEarlyFinish = true;
-		this.dirtyLateStart = true;
-		this.dirtyLateFinish = true;
+		this.dirtyEarlyTimes = true;
+		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
 		this.dirtyCriticalPath = true;
 		this.dirtyFollowing = true;
@@ -189,14 +177,14 @@ public class PrecedenceDiagram {
 				}
 			}
 		}
-		this.dirtyEarlyFinish = this.dirtyEarlyStart = false;
+		this.dirtyEarlyTimes = false;
 	}
 
 	/**
 	 * DFS traversal from each of the tasks with no dependencies
 	 */
 	private void generateLateTimes() {
-		if (this.dirtyEarlyStart || this.dirtyEarlyFinish) this.generateEarlyTimes();
+		if (this.dirtyEarlyTimes) this.generateEarlyTimes();
 		Stack<Task> taskStack;
 		int maxTime = 0;
 		for (Task t : this.getTasks()) {
@@ -222,14 +210,14 @@ public class PrecedenceDiagram {
 				}
 			}
 		}
-		this.dirtyLateStart = this.dirtyLateFinish = false;
+		this.dirtyLateTimes = false;
 	}
 
 	/**
 	 * Generates the total float for each task
 	 */
 	public void generateTotalFloat() {
-		if (this.dirtyEarlyStart || this.dirtyLateStart) this.generateTimes();
+		if (this.dirtyEarlyTimes || this.dirtyLateTimes) this.generateTimes();
 		for(Task task : getTasks())
 			task.setTotalFloat(task.getLatestStart() - task.getEarliestStart());
 		this.dirtyTotalFloat = false;
@@ -240,8 +228,8 @@ public class PrecedenceDiagram {
 	 */
 	public void generateTimes() {
 		if (this.dirtyFollowing) this.generateFollowingTasks();
-		if (this.dirtyEarlyStart || this.dirtyEarlyFinish) this.generateEarlyTimes();
-		if (this.dirtyLateStart || this.dirtyLateFinish) this.generateLateTimes();
+		if (this.dirtyEarlyTimes) this.generateEarlyTimes();
+		if (this.dirtyLateTimes) this.generateLateTimes();
 		if (this.dirtyTotalFloat) this.generateTotalFloat();
 	}
 
