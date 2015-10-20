@@ -1,19 +1,34 @@
 package pdm;
 
-import java.io.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
 
 public class PrecedenceDiagram {
 
 	private Set<Task> tasks;
 	private List<Set<Task>> criticalPaths;
-	private Boolean dirtyEarlyStart;
-	private Boolean dirtyEarlyFinish;
-	private Boolean dirtyLateStart;
-	private Boolean dirtyLateFinish;
-	private Boolean dirtyTotalFloat;
+	private boolean dirtyEarlyStart;
+	private boolean dirtyEarlyFinish;
+	private boolean dirtyLateStart;
+	private boolean dirtyLateFinish;
+	private boolean dirtyTotalFloat;
+	private boolean dirtyCriticalPath;
+	private boolean dirtyFollowing;
+
+	public PrecedenceDiagram() {
+		this.dirtyEarlyStart = true;
+		this.dirtyEarlyFinish = true;
+		this.dirtyLateStart = true;
+		this.dirtyLateFinish = true;
+		this.dirtyTotalFloat = true;
+		this.dirtyCriticalPath = true;
+		this.dirtyFollowing = true;
+		this.tasks = new HashSet<>();
+		this.generateCriticalPaths();
+	}
 
 	public PrecedenceDiagram(Set<Task> tasks) {
 		this.dirtyEarlyStart = true;
@@ -21,6 +36,8 @@ public class PrecedenceDiagram {
 		this.dirtyLateStart = true;
 		this.dirtyLateFinish = true;
 		this.dirtyTotalFloat = true;
+		this.dirtyCriticalPath = true;
+		this.dirtyFollowing = true;
 		this.tasks = tasks;
 		this.generateCriticalPaths();
 	}
@@ -31,6 +48,8 @@ public class PrecedenceDiagram {
 		this.dirtyLateStart = true;
 		this.dirtyLateFinish = true;
 		this.dirtyTotalFloat = true;
+		this.dirtyCriticalPath = true;
+		this.dirtyFollowing = true;
 		this.tasks = new HashSet<>();
 		this.parseTasks(filename);
 		this.generateCriticalPaths();
@@ -43,17 +62,28 @@ public class PrecedenceDiagram {
 		this.dirtyLateStart = true;
 		this.dirtyLateFinish = true;
 		this.dirtyTotalFloat = true;
+		this.dirtyCriticalPath = true;
+		this.dirtyFollowing = true;
 	}
 
 	public void removeTask(Task task) {
+		// TODO Remove links in other tasks
 		this.tasks.remove(task);
 		this.dirtyEarlyStart = true;
 		this.dirtyEarlyFinish = true;
 		this.dirtyLateStart = true;
 		this.dirtyLateFinish = true;
 		this.dirtyTotalFloat = true;
+		this.dirtyCriticalPath = true;
+		this.dirtyFollowing = true;
 	}
 
+	/**
+	 * Looks up the task with a given name
+	 *
+	 * @param name
+	 * @return task with the given name
+	 */
 	public Task findTask(String name) {
 		for (Task task : getTasks()) {
 			if (task.getName().equals(name))
@@ -63,7 +93,13 @@ public class PrecedenceDiagram {
 		return null; // not found
 	}
 
-	public Set<Task> parseDependencies(String dependencyString) {
+	/**
+	 * Helper method for parseTasks
+	 *
+	 * @param dependencyString
+	 * @return dependencies
+	 */
+	private Set<Task> parseDependencies(String dependencyString) {
 		Set<Task> dependencies = new HashSet<>();
 		for (char ch : dependencyString.toCharArray()) {
 			dependencies.add(this.findTask(Character.toString(ch)));
@@ -71,6 +107,11 @@ public class PrecedenceDiagram {
 		return dependencies;
 	}
 
+	/**
+	 * Parses the csv file to generate a PDM Diagram
+	 *
+	 * @param csvFile
+	 */
 	public void parseTasks(String csvFile) {
 		BufferedReader br = null;
 		String line;
@@ -105,82 +146,95 @@ public class PrecedenceDiagram {
 	}
 
 	/**
-	 * This is called first. Assigns the greatest earliest finish of this task's
-	 * dependencies. If this task has no dependencies (i.e. is a "first" task in
-	 * the PDM), the earliest start is assigned to 0.
+	 * BFS traversal from each node with preceding tasks to fill in the following Tasks
 	 */
-	public void generateEarliestStartTimes() {
-		for (Task task : getTasks()) {
-			int earliestStart = 0;
-			for (Task dependency : task.getDependencies()) {
-				if (dependency.getDuration() > earliestStart)
-					earliestStart = dependency.getEarliestFinish();
-			}
-
-			task.setEarliestStart(earliestStart);
-		}
-		this.dirtyEarlyStart = false;
-	}
-
-	/**
-	 * This is called second. Assigns the earliest finish of this task to be the
-	 * sum of its earliest start and its duration.
-	 */
-	public void generateEarliestFinishTimes() {
-		if (this.dirtyEarlyStart) generateEarliestFinishTimes();
-		for (Task task : getTasks())
-			task.setEarliestFinish(task.getEarliestStart() + task.getDuration());
-		this.dirtyEarlyFinish = false;
-	}
-
-	/**
-	 * This is called fourth and last. Assigns the task's latest start to be the
-	 * latest finish minus the duration of the task.
-	 */
-	public void generateLatestStartTimes() {
-		if (this.dirtyLateFinish) this.generateLatestFinishTimes();
-		for (Task task : getTasks()) {
-			task.setLatestStart(task.getLatestFinish() - task.getDuration());
-			if (task.getLatestStart() < 0)
-				task.setLatestStart(0);
-		}
-		this.dirtyLateStart = false;
-	}
-
-	/**
-	 * This is called third. Assigns the latest finish time of the task to the
-	 * smallest latest start of this task's next tasks. Otherwise, if it has no
-	 * next tasks, it is set to the same as the earliest finish.
-	 */
-	public void generateLatestFinishTimes() {
-		if (this.dirtyEarlyFinish) generateEarliestFinishTimes();
-		for (Task task : getTasks()) {
-			if (task.getNextTasks().size() > 0) {
-				int currentLatestFinish = -1; // starting point, guaranteed to
-												// be replaced
-				for (Task nextTask : task.getNextTasks()) {
-					if (currentLatestFinish == -1) // is the first task in the
-													// set of next tasks
-						currentLatestFinish = nextTask.getLatestStart();
-					else {
-						if (nextTask.getLatestStart() < currentLatestFinish)
-							currentLatestFinish = nextTask.getLatestStart();
+	private void generateFollowingTasks() {
+		Queue<Task> taskQueue;
+		for (Task t : this.getTasks()) {
+			if (!t.getPrecedingTasks().isEmpty()) {
+				taskQueue = new LinkedList<>();
+				taskQueue.add(t);
+				while(!taskQueue.isEmpty()) {
+					Task tmp = taskQueue.remove();
+					for(Task u : tmp.getPrecedingTasks()) {
+						taskQueue.add(u);
+						u.addFollowingTask(tmp);
 					}
 				}
-				task.setLatestFinish(currentLatestFinish);
-			} else // doesn't have any next tasks, is a final task
-				task.setLatestFinish(task.getEarliestFinish());
+			}
 		}
-		this.dirtyLateFinish = false;
+		this.dirtyFollowing = false;
 	}
 
-	public void generateTimes() {
-		this.generateEarliestStartTimes();
-		this.generateEarliestFinishTimes();
-		this.generateLatestFinishTimes();
-		this.generateLatestStartTimes();
+	/**
+	 * DFS traversal from each of the tasks with no dependencies
+	 */
+	public void generateEarlyTimes() {
+		if (this.dirtyFollowing) this.generateFollowingTasks();
+		System.out.println("Early Times\n-----------");
+		Stack<Task> taskStack;
+		for (Task t : this.getTasks()) {
+			if (t.getPrecedingTasks().isEmpty()) {
+				taskStack = new Stack<>();
+				t.setEarliestStart(0);
+				t.setEarliestFinish(t.getDuration());
+				taskStack.push(t);
+				while(!taskStack.isEmpty()) {
+					Task tmp = taskStack.pop();
+					for (Task u : tmp.getFollowingTasks()) {
+						if (tmp.getEarliestStart() > u.getEarliestFinish()) {
+							u.setEarliestStart(tmp.getEarliestFinish());
+							u.setEarliestFinish(u.getEarliestStart() + u.getDuration());
+						}
+						taskStack.push(u);
+					}
+					System.out.print(tmp.getName());
+				}
+				System.out.println();
+			}
+		}
+		this.dirtyEarlyFinish = this.dirtyEarlyStart = false;
 	}
 
+	/**
+	 * DFS traversal from each of the tasks with no dependencies
+	 */
+	private void generateLateTimes() {
+		if (this.dirtyEarlyStart || this.dirtyEarlyFinish) this.generateEarlyTimes();
+		System.out.println("Late Times\n----------");
+		Stack<Task> taskStack;
+		int maxTime = 0;
+		for (Task t : this.getTasks()) {
+			if (t.getFollowingTasks().isEmpty() && t.getEarliestFinish() > maxTime) {
+				maxTime = t.getEarliestFinish();
+			}
+		}
+		for (Task t : this.getTasks()) {
+			if (t.getFollowingTasks().isEmpty()) {
+				taskStack = new Stack<>();
+				t.setLatestFinish(maxTime);
+				t.setLatestStart(t.getLatestFinish() - t.getDuration());
+				taskStack.push(t);
+				while(!taskStack.isEmpty()) {
+					Task tmp = taskStack.pop();
+					for (Task u : tmp.getPrecedingTasks()) {
+						if (tmp.getLatestStart() > u.getLatestFinish()) {
+							u.setLatestFinish(tmp.getLatestStart());
+							u.setLatestStart(u.getLatestFinish() - u.getDuration());
+						}
+						taskStack.push(u);
+					}
+					System.out.print(tmp.getName());
+				}
+				System.out.println();
+			}
+		}
+		this.dirtyLateStart = this.dirtyLateFinish = false;
+	}
+
+	/**
+	 * Generates the total float for each task
+	 */
 	public void generateTotalFloat() {
 		if (this.dirtyEarlyStart || this.dirtyLateStart) this.generateTimes();
 		for(Task task : getTasks())
@@ -188,18 +242,27 @@ public class PrecedenceDiagram {
 		this.dirtyTotalFloat = false;
 	}
 
-	private List<Task> recursiveDFS(Task t) {
-		Set<Task> dependencies = t.getDependencies();
-		return null; // TODO
+	/**
+	 * Runs all methods to get the early, late, and total float times
+	 */
+	public void generateTimes() {
+		if (this.dirtyFollowing) this.generateFollowingTasks();
+		if (this.dirtyEarlyStart || this.dirtyEarlyFinish) this.generateEarlyTimes();
+		if (this.dirtyLateStart || this.dirtyLateFinish) this.generateLateTimes();
+		if (this.dirtyTotalFloat) this.generateTotalFloat();
 	}
 
+	/**
+	 * Generates the critical paths
+	 */
 	public void generateCriticalPaths() {
 		if (this.dirtyTotalFloat) generateTotalFloat();
 		for (Task t : this.tasks) {
-			if (t.getDependencies().isEmpty() && t.getTotalFloat() == 0) {
+			if (t.getPrecedingTasks().isEmpty() && t.getTotalFloat() == 0) {
 				// TODO
 			}
 		}
+		this.dirtyCriticalPath = false;
 	}
 
 	public List<Set<Task>> getCriticalPaths() {
@@ -214,9 +277,9 @@ public class PrecedenceDiagram {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (Task task : this.getTasks()) {
-			builder.append("---------------------\n");
+			builder.append(">>>>>>>>>>>>>>>>>>>>>\n");
 			builder.append(task.toString() + "\n");
-			builder.append("---------------------\n");
+			builder.append("<<<<<<<<<<<<<<<<<<<<<\n");
 		}
 		return builder.toString();
 	}

@@ -12,11 +12,11 @@ public class Task {
 	private int latestStart;
 	private int latestFinish;
 	private int totalFloat;
-	private Set<Task> dependencies;
-	private Set<Task> nextTasks;
+	private Set<Task> precedingTasks;
+	private Set<Task> followingTasks;
 	private boolean isCompleted;
 
-	public Task(String name, int duration, Set<Task> dependencies) {
+	public Task(String name, int duration, Set<Task> precedingTasks) {
 		this.name = name;
 		this.duration = duration;
 		this.earliestStart = -1;
@@ -24,8 +24,8 @@ public class Task {
 		this.latestStart = -1;
 		this.latestFinish = -1;
 		this.totalFloat = -1;
-		this.dependencies = dependencies;
-		this.nextTasks = new HashSet<Task>();
+		this.precedingTasks = precedingTasks;
+		this.followingTasks = new HashSet<>();
 		this.isCompleted = false;
 	}
 
@@ -39,15 +39,23 @@ public class Task {
 		builder.append("Latest start: " + getLatestStart() + "\n");
 		builder.append("Latest finish: " + getLatestFinish() + "\n");
 		builder.append("Total float: " + getTotalFloat() + "\n");
-		if (getDependencies().size() > 0) {
-			builder.append("Dependencies: ");
-			for (Task dep : getDependencies()) {
-				builder.append(dep.getName() + " ");
+		builder.append("Dependencies: ");
+		if (this.getPrecedingTasks().size() > 0) {
+			for (Task t : this.getPrecedingTasks()) {
+				builder.append(t.getName() + " ");
 			}
-		} else
-			builder.append("No dependencies.");
-
+		} else {
+			builder.append("No dependencies");
+		}
 		builder.append("\n");
+		builder.append("Following: ");
+		if (this.getFollowingTasks().size() > 0) {
+			for (Task t : this.getFollowingTasks()) {
+				builder.append(t.getName() + " ");
+			}
+		} else {
+			builder.append("No following");
+		}
 		return builder.toString();
 	}
 
@@ -99,32 +107,28 @@ public class Task {
 		this.latestFinish = latestFinish;
 	}
 
-	public Set<Task> getDependencies() {
-		return dependencies;
+	public Set<Task> getPrecedingTasks() {
+		return precedingTasks;
 	}
 
-	public void setDependencies(Set<Task> dependencies) {
-		this.dependencies = dependencies;
+	public Set<Task> getFollowingTasks() {
+		return followingTasks;
 	}
 
-	public Set<Task> getNextTasks() {
-		return nextTasks;
+	public void addFollowingTask(Task followingTask) {
+		this.followingTasks.add(followingTask);
 	}
 
-	public void addNextTask(Task nextTask) {
-		this.nextTasks.add(nextTask);
-	}
-
-	public void removeNextTask(Task nextTask) {
-		this.nextTasks.remove(nextTask);
+	public void removeFollowingTask(Task followingTask) {
+		this.followingTasks.remove(followingTask);
 	}
 
 	public void addDependency(Task dependency) {
-		this.dependencies.add(dependency);
+		this.precedingTasks.add(dependency);
 	}
 
 	public void removeDependency(Task dependency) {
-		this.dependencies.remove(dependency);
+		this.precedingTasks.remove(dependency);
 	}
 
 	public boolean isCompleted() {
