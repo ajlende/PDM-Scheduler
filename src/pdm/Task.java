@@ -21,8 +21,8 @@ public class Task {
 		this.duration = duration;
 		this.earliestStart = -1;
 		this.earliestFinish = -1;
-		this.latestStart = -1;
-		this.latestFinish = -1;
+		this.latestStart = Integer.MAX_VALUE;
+		this.latestFinish = Integer.MAX_VALUE;
 		this.totalFloat = -1;
 		this.precedingTasks = precedingTasks;
 		this.followingTasks = new HashSet<>();

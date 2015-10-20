@@ -213,7 +213,7 @@ public class PrecedenceDiagram {
 				while(!taskStack.isEmpty()) {
 					Task tmp = taskStack.pop();
 					for (Task u : tmp.getPrecedingTasks()) {
-						if (tmp.getLatestStart() > u.getLatestFinish()) {
+						if (tmp.getLatestStart() < u.getLatestFinish()) {
 							u.setLatestFinish(tmp.getLatestStart());
 							u.setLatestStart(u.getLatestFinish() - u.getDuration());
 						}
