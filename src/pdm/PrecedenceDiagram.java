@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
@@ -92,6 +93,8 @@ public class PrecedenceDiagram {
 	 * @return dependencies
 	 */
 	private Set<Task> parseDependencies(String dependencyString) throws IllegalArgumentException {
+		if (dependencyString == null) // no dependencies were specified
+			return null;
 		Set<Task> dependencies = new HashSet<>();
 		String[] dependencyArray = dependencyString.split(",");
 		for (String dep : dependencyArray) {
@@ -119,14 +122,18 @@ public class PrecedenceDiagram {
 				Scanner lineReader = new Scanner(line);
 				String taskName = lineReader.next();
 				String duration = lineReader.next();
+				String dependencyString = null;
+				if (lineReader.hasNext())
+					dependencyString = lineReader.next();
 				lineReader.close();
-				String dependencyString = scanner.next();
 				Set<Task> dependencies = null;
 				try {
 					dependencies = parseDependencies(dependencyString);
 				} catch (IllegalArgumentException e) {
 					System.out.println("Dependency task not previously specified. Stop trying to break it.");
 					return;
+				} catch (NoSuchElementException e) {
+					System.out.println("Error reading file. Stop trying to break it.");
 				}
 				Task task = new Task(taskName, Integer.parseInt(duration), dependencies);
 				addTask(task);
