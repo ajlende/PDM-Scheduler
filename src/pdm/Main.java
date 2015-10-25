@@ -46,7 +46,7 @@ public class Main {
 //        pdm.addTask(K);
 //        pdm.addTask(L);
         
-        PrecedenceDiagram pdm = new PrecedenceDiagram(args[0]);
+        PrecedenceDiagram pdm = new PrecedenceDiagram("schedule.csv");
 
         Set<Task> critical = pdm.getCriticalPaths();
         System.out.print("Critical Path Tasks: ");
