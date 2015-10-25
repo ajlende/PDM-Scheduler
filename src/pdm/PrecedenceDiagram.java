@@ -149,9 +149,9 @@ public class PrecedenceDiagram {
 			if (!t.getPrecedingTasks().isEmpty()) {
 				taskQueue = new LinkedList<>();
 				taskQueue.add(t);
-				while(!taskQueue.isEmpty()) {
+				while (!taskQueue.isEmpty()) {
 					Task tmp = taskQueue.remove();
-					for(Task u : tmp.getPrecedingTasks()) {
+					for (Task u : tmp.getPrecedingTasks()) {
 						taskQueue.add(u);
 						u.addFollowingTask(tmp);
 					}
@@ -165,7 +165,8 @@ public class PrecedenceDiagram {
 	 * DFS traversal from each of the tasks with no dependencies
 	 */
 	public void generateEarlyTimes() {
-		if (this.dirtyFollowing) this.generateFollowingTasks();
+		if (this.dirtyFollowing)
+			this.generateFollowingTasks();
 		Stack<Task> taskStack;
 		for (Task t : this.getTasks()) {
 			if (t.getPrecedingTasks().isEmpty()) {
@@ -173,7 +174,7 @@ public class PrecedenceDiagram {
 				t.setEarliestStart(0);
 				t.setEarliestFinish(t.getDuration());
 				taskStack.push(t);
-				while(!taskStack.isEmpty()) {
+				while (!taskStack.isEmpty()) {
 					Task tmp = taskStack.pop();
 					for (Task u : tmp.getFollowingTasks()) {
 						if (tmp.getEarliestFinish() > u.getEarliestStart()) {
@@ -192,7 +193,8 @@ public class PrecedenceDiagram {
 	 * DFS traversal from each of the tasks with no dependencies
 	 */
 	private void generateLateTimes() {
-		if (this.dirtyEarlyTimes) this.generateEarlyTimes();
+		if (this.dirtyEarlyTimes)
+			this.generateEarlyTimes();
 		Stack<Task> taskStack;
 		int maxTime = 0;
 		for (Task t : this.getTasks()) {
@@ -206,7 +208,7 @@ public class PrecedenceDiagram {
 				t.setLatestFinish(maxTime);
 				t.setLatestStart(t.getLatestFinish() - t.getDuration());
 				taskStack.push(t);
-				while(!taskStack.isEmpty()) {
+				while (!taskStack.isEmpty()) {
 					Task tmp = taskStack.pop();
 					for (Task u : tmp.getPrecedingTasks()) {
 						if (tmp.getLatestStart() < u.getLatestFinish()) {
@@ -225,8 +227,9 @@ public class PrecedenceDiagram {
 	 * Generates the total float for each task
 	 */
 	public void generateTotalFloat() {
-		if (this.dirtyEarlyTimes || this.dirtyLateTimes) this.generateTimes();
-		for(Task task : getTasks())
+		if (this.dirtyEarlyTimes || this.dirtyLateTimes)
+			this.generateTimes();
+		for (Task task : getTasks())
 			task.setTotalFloat(task.getLatestStart() - task.getEarliestStart());
 		this.dirtyTotalFloat = false;
 	}
@@ -235,23 +238,29 @@ public class PrecedenceDiagram {
 	 * Runs all methods to get the early, late, and total float times
 	 */
 	public void generateTimes() {
-		if (this.dirtyFollowing) this.generateFollowingTasks();
-		if (this.dirtyEarlyTimes) this.generateEarlyTimes();
-		if (this.dirtyLateTimes) this.generateLateTimes();
-		if (this.dirtyTotalFloat) this.generateTotalFloat();
+		if (this.dirtyFollowing)
+			this.generateFollowingTasks();
+		if (this.dirtyEarlyTimes)
+			this.generateEarlyTimes();
+		if (this.dirtyLateTimes)
+			this.generateLateTimes();
+		if (this.dirtyTotalFloat)
+			this.generateTotalFloat();
 	}
 
 	/**
 	 * Adds all tasks with a total float of zero to the criticalPaths field
 	 */
 	public void generateCriticalPaths() {
-		if (this.dirtyTotalFloat) generateTotalFloat();
+		if (this.dirtyTotalFloat)
+			generateTotalFloat();
 		criticalPaths.addAll(this.tasks.stream().filter(t -> t.getTotalFloat() == 0).collect(Collectors.toList()));
 		this.dirtyCriticalPath = false;
 	}
 
 	public Set<Task> getCriticalPaths() {
-		if (dirtyCriticalPath) generateCriticalPaths();
+		if (dirtyCriticalPath)
+			generateCriticalPaths();
 		return this.criticalPaths;
 	}
 
