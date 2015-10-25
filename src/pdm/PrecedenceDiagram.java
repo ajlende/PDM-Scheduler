@@ -1,10 +1,13 @@
 package pdm;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class PrecedenceDiagram {
@@ -88,14 +91,17 @@ public class PrecedenceDiagram {
 	 * @param dependencyString
 	 * @return dependencies
 	 */
-	private Set<Task> parseDependencies(String dependencyString) {
+	private Set<Task> parseDependencies(String dependencyString) throws IllegalArgumentException {
 		Set<Task> dependencies = new HashSet<>();
-		for (char ch : dependencyString.toCharArray()) {
-			dependencies.add(this.findTask(Character.toString(ch)));
+		String[] dependencyArray = dependencyString.split(",");
+		for (String dep : dependencyArray) {
+			Task dependency = findTask(dep);
+			if (dependency == null)
+				throw new IllegalArgumentException();
+			else
+				dependencies.add(dependency);
 		}
 		return dependencies;
-		
-		// TODO
 	}
 
 	/**
@@ -104,40 +110,38 @@ public class PrecedenceDiagram {
 	 * @param csvFile
 	 */
 	public void parseTasks(String csvFile) {
-		BufferedReader br = null;
-		String line;
-		String cvsSplitBy = ",";
-
+		Scanner scanner = null;
 		try {
-			br = new BufferedReader(new FileReader(csvFile));
-			while ((line = br.readLine()) != null) {
-
-				// use comma as separator
-				String[] taskFields = line.split(cvsSplitBy);
-				Set<Task> dependencies = this.parseDependencies(taskFields[2]);
-				Task task = new Task(taskFields[0], Integer.parseInt(taskFields[1]), dependencies);
-				this.addTask(task);
-			}
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (br != null) {
+			File file = new File(csvFile);
+			scanner = new Scanner(file);
+			while (scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				Scanner lineReader = new Scanner(line);
+				String taskName = lineReader.next();
+				String duration = lineReader.next();
+				lineReader.close();
+				String dependencyString = scanner.next();
+				Set<Task> dependencies = null;
 				try {
-					br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+					dependencies = parseDependencies(dependencyString);
+				} catch (IllegalArgumentException e) {
+					System.out.println("Dependency task not previously specified. Stop trying to break it.");
+					return;
 				}
+				Task task = new Task(taskName, Integer.parseInt(duration), dependencies);
+				addTask(task);
 			}
+			scanner.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Bogus file. Stop trying to break it.");
+		} catch (NumberFormatException e) {
+			System.out.println("Input a number for the duration. Stop trying to break it.");
 		}
-		
-		// TODO
 	}
 
 	/**
-	 * BFS traversal from each node with preceding tasks to fill in the following Tasks
+	 * BFS traversal from each node with preceding tasks to fill in the
+	 * following Tasks
 	 */
 	private void generateFollowingTasks() {
 		Queue<Task> taskQueue;
