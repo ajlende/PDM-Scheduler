@@ -136,6 +136,10 @@ public class PrecedenceDiagram {
 					System.out.println("Error reading file. Stop trying to break it.");
 				}
 				Task task = new Task(taskName, Integer.parseInt(duration), dependencies);
+				for (Task dependency : dependencies) {
+					// link the dependencies to this task
+					dependency.addFollowingTask(task);
+				}
 				addTask(task);
 			}
 			scanner.close();
