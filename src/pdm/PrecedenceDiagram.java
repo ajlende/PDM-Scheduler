@@ -73,8 +73,17 @@ public class PrecedenceDiagram {
 	 * Removes the specified task from the PDM
 	 */
 	public void removeTask(Task task) {
-		// TODO Remove links in other tasks
 		this.tasks.remove(task);
+		for (Task t : this.tasks) {
+			for (Task following : t.getFollowingTasks()) {
+				if (following.equals(task))
+					t.removeFollowingTask(following);
+			}
+			for (Task dep : t.getPrecedingTasks()) {
+				if (dep.equals(task))
+					t.removeDependency(dep);
+			}
+		}
 		this.dirtyEarlyTimes = true;
 		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
