@@ -19,14 +19,12 @@ public class PrecedenceDiagram {
 	private boolean dirtyLateTimes;
 	private boolean dirtyTotalFloat;
 	private boolean dirtyCriticalPath;
-	private boolean dirtyFollowing;
 
 	public PrecedenceDiagram() {
 		this.dirtyEarlyTimes = true;
 		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
 		this.dirtyCriticalPath = true;
-		this.dirtyFollowing = true;
 		this.tasks = new HashSet<>();
 		this.criticalPaths = new HashSet<>();
 	}
@@ -36,7 +34,6 @@ public class PrecedenceDiagram {
 		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
 		this.dirtyCriticalPath = true;
-		this.dirtyFollowing = true;
 		this.tasks = tasks;
 		this.criticalPaths = new HashSet<>();
 	}
@@ -46,7 +43,6 @@ public class PrecedenceDiagram {
 		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
 		this.dirtyCriticalPath = true;
-		this.dirtyFollowing = true;
 		this.tasks = new HashSet<>();
 		this.criticalPaths = new HashSet<>();
 		this.parseTasks(filename);
@@ -58,7 +54,6 @@ public class PrecedenceDiagram {
 		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
 		this.dirtyCriticalPath = true;
-		this.dirtyFollowing = true;
 	}
 
 	public void removeTask(Task task) {
@@ -68,7 +63,6 @@ public class PrecedenceDiagram {
 		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
 		this.dirtyCriticalPath = true;
-		this.dirtyFollowing = true;
 	}
 
 	/**
@@ -156,33 +150,9 @@ public class PrecedenceDiagram {
 	}
 
 	/**
-	 * BFS traversal from each node with preceding tasks to fill in the
-	 * following Tasks
-	 */
-	private void generateFollowingTasks() {
-		Queue<Task> taskQueue;
-		for (Task t : this.getTasks()) {
-			if (!t.getPrecedingTasks().isEmpty()) {
-				taskQueue = new LinkedList<>();
-				taskQueue.add(t);
-				while (!taskQueue.isEmpty()) {
-					Task tmp = taskQueue.remove();
-					for (Task u : tmp.getPrecedingTasks()) {
-						taskQueue.add(u);
-						u.addFollowingTask(tmp);
-					}
-				}
-			}
-		}
-		this.dirtyFollowing = false;
-	}
-
-	/**
 	 * DFS traversal from each of the tasks with no dependencies
 	 */
 	public void generateEarlyTimes() {
-		if (this.dirtyFollowing)
-			this.generateFollowingTasks();
 		Stack<Task> taskStack;
 		for (Task t : this.getTasks()) {
 			if (t.getPrecedingTasks().isEmpty()) {
@@ -254,8 +224,6 @@ public class PrecedenceDiagram {
 	 * Runs all methods to get the early, late, and total float times
 	 */
 	public void generateTimes() {
-		if (this.dirtyFollowing)
-			this.generateFollowingTasks();
 		if (this.dirtyEarlyTimes)
 			this.generateEarlyTimes();
 		if (this.dirtyLateTimes)
