@@ -3,6 +3,11 @@ package pdm;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A specified Task that is part of a PDM schedule.
+ * 
+ * @author Andrew Bowler, Alex Lende
+ */
 public class Task {
 
 	private String name;
@@ -28,7 +33,10 @@ public class Task {
 		this.followingTasks = new HashSet<>();
 		this.isCompleted = false;
 	}
-
+	
+	/**
+	 * Prints all information about this task.
+	 */
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

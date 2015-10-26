@@ -11,6 +11,11 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+/**
+ * A PDM schedule with a set of tasks
+ * 
+ * @author Andrew Bowler, Alex Lende
+ */
 public class PrecedenceDiagram {
 
 	private Set<Task> tasks;
@@ -64,6 +69,9 @@ public class PrecedenceDiagram {
 		this.dirtyCriticalPath = true;
 	}
 
+	/**
+	 * Removes the specified task from the PDM
+	 */
 	public void removeTask(Task task) {
 		// TODO Remove links in other tasks
 		this.tasks.remove(task);
@@ -138,10 +146,17 @@ public class PrecedenceDiagram {
 		return sortedCriticalPaths;
 	}
 
+	/**
+	 * Returns the set of all tasks in the PDM
+	 */
 	public Set<Task> getTasks() {
 		return tasks;
 	}
 
+	/**
+	 * Prints out each task of the PDM and all of its relevant information (see
+	 * Task.toString() implementation).
+	 */
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

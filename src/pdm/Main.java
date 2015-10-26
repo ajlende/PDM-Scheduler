@@ -2,6 +2,9 @@ package pdm;
 
 import java.util.List;
 
+/**
+ * @author Andrew Bowler, Alex Lende
+ */
 public class Main {
 
 	public static void main(String[] args) {
