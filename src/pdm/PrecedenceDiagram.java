@@ -48,8 +48,16 @@ public class PrecedenceDiagram {
 		this.parseTasks(filename);
 	}
 
+	/**
+	 * Adds a task if it doesn't already exist in the PDM, otherwise throws an
+	 * exception.
+	 */
 	public void addTask(Task task) {
-		this.tasks.add(task);
+		for (Task t : getTasks()) {
+			if (t.getName().equals(task.getName()))
+				throw new IllegalArgumentException();
+		}
+		tasks.add(task);
 		this.dirtyEarlyTimes = true;
 		this.dirtyLateTimes = true;
 		this.dirtyTotalFloat = true;
@@ -146,14 +154,14 @@ public class PrecedenceDiagram {
 	}
 
 	/**
-	 * Parses the csv file to generate a PDM Diagram
+	 * Parses the file to generate a PDM Diagram
 	 *
-	 * @param csvFile
+	 * @param filepath
 	 */
-	private void parseTasks(String csvFile) {
+	private void parseTasks(String filepath) {
 		Scanner scanner = null;
 		try {
-			File file = new File(csvFile);
+			File file = new File(filepath);
 			scanner = new Scanner(file);
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
@@ -169,9 +177,10 @@ public class PrecedenceDiagram {
 					dependencies = parseDependencies(dependencyString);
 				} catch (IllegalArgumentException e) {
 					System.out.println("Dependency task not previously specified. Stop trying to break it.");
-					return;
+					throw e;
 				} catch (NoSuchElementException e) {
 					System.out.println("Error reading file. Stop trying to break it.");
+					throw e;
 				}
 				Task task = new Task(taskName, Integer.parseInt(duration), dependencies);
 				for (Task dependency : dependencies) {
@@ -180,16 +189,24 @@ public class PrecedenceDiagram {
 						dep.addFollowingTask(task);
 					else {
 						System.out.println("Error linking dependencies to following tasks.");
-						return;
+						throw new IllegalStateException();
 					}
 				}
-				addTask(task);
+
+				try {
+					addTask(task);
+				} catch (IllegalArgumentException e) {
+					System.out.println("This task already exists in the "
+							+ "PDM and cannot be modified. Stop trying to break it.");
+					throw e;
+				}
 			}
 			scanner.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Bogus file. Stop trying to break it.");
 		} catch (NumberFormatException e) {
 			System.out.println("Input a number for the duration. Stop trying to break it.");
+			throw e;
 		}
 	}
 
