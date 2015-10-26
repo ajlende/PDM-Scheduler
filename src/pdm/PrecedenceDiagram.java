@@ -138,33 +138,34 @@ public class PrecedenceDiagram {
 	}
 
 	/**
-	 * Returns the in-order critical path of the PDM.
+	 * Returns a list of in-order critical paths from the set of Tasks that are
+	 * part of at least one critical path, through DFS traversal.
 	 */
 	public List<List<Task>> getCriticalPaths() {
 		if (dirtyCriticalPath)
 			generateCriticalPaths();
-		Set<Task> criticalPathSet = this.criticalPaths;
-
-		// TODO generate list of critical paths
-
-		// get the first task in the critical path (no dependencies)
-		List<Task> sortedCriticalPaths = new ArrayList<>();
-		for (Task task : criticalPathSet) {
-			if (task.getPrecedingTasks().isEmpty()) {
-				sortedCriticalPaths.add(task);
-				break;
-			}
-		}
-		// Link up the rest of the critical path such that we have a sorted
-		// critical path
-		for (int i = 0; i < criticalPathSet.size() - 1; i++) {
-			for (Task task : criticalPathSet) {
-				if (sortedCriticalPaths.get(i).getFollowingTasks().contains(task)) {
-					sortedCriticalPaths.add(task);
+		
+		List<List<Task>> sortedCriticalPaths = new ArrayList<>();
+		Stack<Task> taskStack;
+		int idx = 0;
+		for (Task t : this.criticalPaths) {
+			if (t.getPrecedingTasks().isEmpty()) {
+				taskStack = new Stack<>();
+				sortedCriticalPaths.add(new ArrayList<>());
+				sortedCriticalPaths.get(idx).add(t);
+				taskStack.push(t);
+				while (!taskStack.isEmpty()) {
+					Task tmp = taskStack.pop();
+					for (Task u : tmp.getFollowingTasks()) {
+						if (this.criticalPaths.contains(u))
+							sortedCriticalPaths.get(idx).add(u);
+						taskStack.push(u);
+					}
 				}
+				idx++;
 			}
 		}
-		return null; // TODO
+		return sortedCriticalPaths;
 	}
 
 	/**
