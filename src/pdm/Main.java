@@ -13,10 +13,13 @@ public class Main {
 			PrecedenceDiagram pdm = new PrecedenceDiagram("test_files/hw3.txt");
 			pdm.generateTimes();
 			System.out.println(pdm.toString());
-			List<Task> critical = pdm.getCriticalPath();
+			List<List<Task>> criticals = pdm.getCriticalPaths();
 			System.out.print("Critical Path Tasks: ");
-			for (Task t : critical)
-				System.out.print(t.getName() + " ");
+			for (List<Task> criticalPath : criticals) {
+				for (Task t : criticalPath)
+					System.out.print(t.getName() + " ");
+				System.out.println();
+			}
 		} catch (Exception e) {
 			return;
 		}

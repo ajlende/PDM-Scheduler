@@ -130,10 +130,12 @@ public class PrecedenceDiagram {
 	/**
 	 * Returns the in-order critical path of the PDM.
 	 */
-	public List<Task> getCriticalPath() {
+	public List<List<Task>> getCriticalPaths() {
 		if (dirtyCriticalPath)
 			generateCriticalPaths();
 		Set<Task> criticalPathSet = this.criticalPaths;
+
+		// TODO generate list of critical paths
 
 		// get the first task in the critical path (no dependencies)
 		List<Task> sortedCriticalPaths = new ArrayList<>();
@@ -152,7 +154,7 @@ public class PrecedenceDiagram {
 				}
 			}
 		}
-		return sortedCriticalPaths;
+		return null; // TODO
 	}
 
 	/**
