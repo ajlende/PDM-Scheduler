@@ -11,5 +11,7 @@ Open up the project in Eclipse and run `Main.java`. Change the file parameter in
  * This is the PDM. It contains a schedule of tasks, and contains logic for generating early/late times, and critical paths.
 * `Task.java`
  * A POJO that describes a PDM task.
+* `test_files/`
+ * Contains all test files of this program
 
 More detailed documentation is in the source files as Javadoc.
