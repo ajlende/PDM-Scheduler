@@ -40,7 +40,7 @@ public class Task {
 		builder.append("Latest finish: " + getLatestFinish() + "\n");
 		builder.append("Total float: " + getTotalFloat() + "\n");
 		builder.append("Dependencies: ");
-		if (this.getPrecedingTasks().size() > 0) {
+		if (this.getPrecedingTasks() != null) {
 			for (Task t : this.getPrecedingTasks()) {
 				builder.append(t.getName() + " ");
 			}
