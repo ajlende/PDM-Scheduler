@@ -107,13 +107,13 @@ public class PrecedenceDiagram {
 					System.out.println("Error reading file. Stop trying to break it.");
 				}
 				Task task = new Task(taskName, Integer.parseInt(duration), dependencies);
-				if (dependencies != null) {
-					for (Task dependency : dependencies) {
-						Task dep = findTask(dependency.getName());
-						if (dep != null)
-							dep.addFollowingTask(task);
-						else
-							System.out.println("Error linking dependencies to following tasks.");
+				for (Task dependency : dependencies) {
+					Task dep = findTask(dependency.getName());
+					if (dep != null)
+						dep.addFollowingTask(task);
+					else {
+						System.out.println("Error linking dependencies to following tasks.");
+						return;
 					}
 				}
 				addTask(task);
@@ -177,7 +177,7 @@ public class PrecedenceDiagram {
 	 */
 	private Set<Task> parseDependencies(String dependencyString) throws IllegalArgumentException {
 		if (dependencyString == null) // no dependencies were specified
-			return null;
+			return new HashSet<>();
 		Set<Task> dependencies = new HashSet<>();
 		String[] dependencyArray = dependencyString.split(",");
 		for (String dep : dependencyArray) {
