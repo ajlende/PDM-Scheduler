@@ -18,8 +18,18 @@ import java.util.stream.Collectors;
  */
 public class PrecedenceDiagram {
 
+	/**
+	 * A PDM has a set of Tasks, and a set of all Tasks that contribute to a
+	 * possible critical path.
+	 */
 	private Set<Task> tasks;
 	private Set<Task> criticalPaths;
+
+	/**
+	 * Checks for method calls. If these are false, that means the related
+	 * methods have already been called and the PDM's state has already been
+	 * updated, and no action is taken.
+	 */
 	private boolean dirtyEarlyTimes;
 	private boolean dirtyLateTimes;
 	private boolean dirtyTotalFloat;
