@@ -3,9 +3,7 @@ package pdm;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
-import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.Stack;
@@ -81,27 +79,6 @@ public class PrecedenceDiagram {
 	}
 
 	/**
-	 * Helper method for parseTasks
-	 *
-	 * @param dependencyString
-	 * @return dependencies
-	 */
-	private Set<Task> parseDependencies(String dependencyString) throws IllegalArgumentException {
-		if (dependencyString == null) // no dependencies were specified
-			return null;
-		Set<Task> dependencies = new HashSet<>();
-		String[] dependencyArray = dependencyString.split(",");
-		for (String dep : dependencyArray) {
-			Task dependency = findTask(dep);
-			if (dependency == null)
-				throw new IllegalArgumentException();
-			else
-				dependencies.add(dependency);
-		}
-		return dependencies;
-	}
-
-	/**
 	 * Parses the csv file to generate a PDM Diagram
 	 *
 	 * @param csvFile
@@ -150,9 +127,73 @@ public class PrecedenceDiagram {
 	}
 
 	/**
+	 * Runs all methods to get the early, late, and total float times
+	 */
+	public void generateTimes() {
+		if (this.dirtyEarlyTimes)
+			this.generateEarlyTimes();
+		if (this.dirtyLateTimes)
+			this.generateLateTimes();
+		if (this.dirtyTotalFloat)
+			this.generateTotalFloat();
+	}
+
+	/**
+	 * Adds all tasks with a total float of zero to the criticalPaths field
+	 */
+	public void generateCriticalPaths() {
+		if (this.dirtyTotalFloat)
+			generateTotalFloat();
+		criticalPaths.addAll(this.tasks.stream().filter(t -> t.getTotalFloat() == 0).collect(Collectors.toList()));
+		this.dirtyCriticalPath = false;
+	}
+
+	public Set<Task> getCriticalPaths() {
+		if (dirtyCriticalPath)
+			generateCriticalPaths();
+		return this.criticalPaths;
+	}
+
+	public Set<Task> getTasks() {
+		return tasks;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		for (Task task : this.getTasks()) {
+			builder.append(">>>>>>>>>>>>>>>>>>>>>\n");
+			builder.append(task.toString() + "\n");
+			builder.append("<<<<<<<<<<<<<<<<<<<<<\n");
+		}
+		return builder.toString();
+	}
+
+	/**
+	 * Helper method for parseTasks
+	 *
+	 * @param dependencyString
+	 * @return dependencies
+	 */
+	private Set<Task> parseDependencies(String dependencyString) throws IllegalArgumentException {
+		if (dependencyString == null) // no dependencies were specified
+			return null;
+		Set<Task> dependencies = new HashSet<>();
+		String[] dependencyArray = dependencyString.split(",");
+		for (String dep : dependencyArray) {
+			Task dependency = findTask(dep);
+			if (dependency == null)
+				throw new IllegalArgumentException();
+			else
+				dependencies.add(dependency);
+		}
+		return dependencies;
+	}
+
+	/**
 	 * DFS traversal from each of the tasks with no dependencies
 	 */
-	public void generateEarlyTimes() {
+	private void generateEarlyTimes() {
 		Stack<Task> taskStack;
 		for (Task t : this.getTasks()) {
 			if (t.getPrecedingTasks().isEmpty()) {
@@ -212,54 +253,11 @@ public class PrecedenceDiagram {
 	/**
 	 * Generates the total float for each task
 	 */
-	public void generateTotalFloat() {
+	private void generateTotalFloat() {
 		if (this.dirtyEarlyTimes || this.dirtyLateTimes)
 			this.generateTimes();
 		for (Task task : getTasks())
 			task.setTotalFloat(task.getLatestStart() - task.getEarliestStart());
 		this.dirtyTotalFloat = false;
-	}
-
-	/**
-	 * Runs all methods to get the early, late, and total float times
-	 */
-	public void generateTimes() {
-		if (this.dirtyEarlyTimes)
-			this.generateEarlyTimes();
-		if (this.dirtyLateTimes)
-			this.generateLateTimes();
-		if (this.dirtyTotalFloat)
-			this.generateTotalFloat();
-	}
-
-	/**
-	 * Adds all tasks with a total float of zero to the criticalPaths field
-	 */
-	public void generateCriticalPaths() {
-		if (this.dirtyTotalFloat)
-			generateTotalFloat();
-		criticalPaths.addAll(this.tasks.stream().filter(t -> t.getTotalFloat() == 0).collect(Collectors.toList()));
-		this.dirtyCriticalPath = false;
-	}
-
-	public Set<Task> getCriticalPaths() {
-		if (dirtyCriticalPath)
-			generateCriticalPaths();
-		return this.criticalPaths;
-	}
-
-	public Set<Task> getTasks() {
-		return tasks;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		for (Task task : this.getTasks()) {
-			builder.append(">>>>>>>>>>>>>>>>>>>>>\n");
-			builder.append(task.toString() + "\n");
-			builder.append("<<<<<<<<<<<<<<<<<<<<<\n");
-		}
-		return builder.toString();
 	}
 }
