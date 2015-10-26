@@ -79,54 +79,6 @@ public class PrecedenceDiagram {
 	}
 
 	/**
-	 * Parses the csv file to generate a PDM Diagram
-	 *
-	 * @param csvFile
-	 */
-	public void parseTasks(String csvFile) {
-		Scanner scanner = null;
-		try {
-			File file = new File(csvFile);
-			scanner = new Scanner(file);
-			while (scanner.hasNextLine()) {
-				String line = scanner.nextLine();
-				Scanner lineReader = new Scanner(line);
-				String taskName = lineReader.next();
-				String duration = lineReader.next();
-				String dependencyString = null;
-				if (lineReader.hasNext())
-					dependencyString = lineReader.next();
-				lineReader.close();
-				Set<Task> dependencies = null;
-				try {
-					dependencies = parseDependencies(dependencyString);
-				} catch (IllegalArgumentException e) {
-					System.out.println("Dependency task not previously specified. Stop trying to break it.");
-					return;
-				} catch (NoSuchElementException e) {
-					System.out.println("Error reading file. Stop trying to break it.");
-				}
-				Task task = new Task(taskName, Integer.parseInt(duration), dependencies);
-				for (Task dependency : dependencies) {
-					Task dep = findTask(dependency.getName());
-					if (dep != null)
-						dep.addFollowingTask(task);
-					else {
-						System.out.println("Error linking dependencies to following tasks.");
-						return;
-					}
-				}
-				addTask(task);
-			}
-			scanner.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("Bogus file. Stop trying to break it.");
-		} catch (NumberFormatException e) {
-			System.out.println("Input a number for the duration. Stop trying to break it.");
-		}
-	}
-
-	/**
 	 * Runs all methods to get the early, late, and total float times
 	 */
 	public void generateTimes() {
@@ -167,6 +119,54 @@ public class PrecedenceDiagram {
 			builder.append("<<<<<<<<<<<<<<<<<<<<<\n");
 		}
 		return builder.toString();
+	}
+
+	/**
+	 * Parses the csv file to generate a PDM Diagram
+	 *
+	 * @param csvFile
+	 */
+	private void parseTasks(String csvFile) {
+		Scanner scanner = null;
+		try {
+			File file = new File(csvFile);
+			scanner = new Scanner(file);
+			while (scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				Scanner lineReader = new Scanner(line);
+				String taskName = lineReader.next();
+				String duration = lineReader.next();
+				String dependencyString = null;
+				if (lineReader.hasNext())
+					dependencyString = lineReader.next();
+				lineReader.close();
+				Set<Task> dependencies = null;
+				try {
+					dependencies = parseDependencies(dependencyString);
+				} catch (IllegalArgumentException e) {
+					System.out.println("Dependency task not previously specified. Stop trying to break it.");
+					return;
+				} catch (NoSuchElementException e) {
+					System.out.println("Error reading file. Stop trying to break it.");
+				}
+				Task task = new Task(taskName, Integer.parseInt(duration), dependencies);
+				for (Task dependency : dependencies) {
+					Task dep = findTask(dependency.getName());
+					if (dep != null)
+						dep.addFollowingTask(task);
+					else {
+						System.out.println("Error linking dependencies to following tasks.");
+						return;
+					}
+				}
+				addTask(task);
+			}
+			scanner.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Bogus file. Stop trying to break it.");
+		} catch (NumberFormatException e) {
+			System.out.println("Input a number for the duration. Stop trying to break it.");
+		}
 	}
 
 	/**
