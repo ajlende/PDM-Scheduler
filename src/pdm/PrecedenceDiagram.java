@@ -2,7 +2,9 @@ package pdm;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.Set;
@@ -100,10 +102,32 @@ public class PrecedenceDiagram {
 		this.dirtyCriticalPath = false;
 	}
 
-	public Set<Task> getCriticalPaths() {
+	/**
+	 * Returns the in-order critical path of the PDM.
+	 */
+	public List<Task> getCriticalPath() {
 		if (dirtyCriticalPath)
 			generateCriticalPaths();
-		return this.criticalPaths;
+		Set<Task> criticalPathSet = this.criticalPaths;
+
+		// get the first task in the critical path (no dependencies)
+		List<Task> sortedCriticalPaths = new ArrayList<>();
+		for (Task task : criticalPathSet) {
+			if (task.getPrecedingTasks().isEmpty()) {
+				sortedCriticalPaths.add(task);
+				break;
+			}
+		}
+		// Link up the rest of the critical path such that we have a sorted
+		// critical path
+		for (int i = 0; i < criticalPathSet.size() - 1; i++) {
+			for (Task task : criticalPathSet) {
+				if (sortedCriticalPaths.get(i).getFollowingTasks().contains(task)) {
+					sortedCriticalPaths.add(task);
+				}
+			}
+		}
+		return sortedCriticalPaths;
 	}
 
 	public Set<Task> getTasks() {

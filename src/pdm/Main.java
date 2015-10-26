@@ -1,6 +1,6 @@
 package pdm;
 
-import java.util.Set;
+import java.util.List;
 
 public class Main {
 
@@ -48,12 +48,9 @@ public class Main {
         
         PrecedenceDiagram pdm = new PrecedenceDiagram("schedule.csv");
         pdm.generateTimes();
-
-        Set<Task> critical = pdm.getCriticalPaths();
+        System.out.println(pdm.toString());
+        List<Task> critical = pdm.getCriticalPath();
         System.out.print("Critical Path Tasks: ");
         for (Task t : critical) System.out.print(t.getName() + " ");
-        System.out.println();
-
-        System.out.println(pdm.toString());
     }
 }
