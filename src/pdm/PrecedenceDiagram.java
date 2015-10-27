@@ -144,7 +144,7 @@ public class PrecedenceDiagram {
 	public List<List<Task>> getCriticalPaths() {
 		if (dirtyCriticalPath)
 			generateCriticalPaths();
-		
+
 		List<List<Task>> sortedCriticalPaths = new ArrayList<>();
 		Stack<Task> taskStack;
 		int idx = 0;
@@ -156,10 +156,23 @@ public class PrecedenceDiagram {
 				taskStack.push(t);
 				while (!taskStack.isEmpty()) {
 					Task tmp = taskStack.pop();
-					for (Task u : tmp.getFollowingTasks()) {
-						if (this.criticalPaths.contains(u))
-							sortedCriticalPaths.get(idx).add(u);
-						taskStack.push(u);
+					if (tmp.getFollowingTasks().isEmpty()) {
+						break;
+					} else {
+						for (Task u : tmp.getFollowingTasks()) {
+							if (this.criticalPaths.contains(u)) {
+								List<Task> currentPath = sortedCriticalPaths.get(idx);
+								if (u.getPrecedingTasks().contains(currentPath.get(currentPath.size() - 1)))
+									sortedCriticalPaths.get(idx).add(u);
+								else {
+									List<Task> newPath = new ArrayList<>(currentPath);
+									newPath.remove(newPath.size() - 1);
+									newPath.add(u);
+									sortedCriticalPaths.add(++idx, newPath);
+								}
+							}
+							taskStack.push(u);
+						}
 					}
 				}
 				idx++;

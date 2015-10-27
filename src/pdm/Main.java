@@ -10,7 +10,7 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			// REPLACE PARAMETER WITH YOUR OWN TEST FILE
-			PrecedenceDiagram pdm = new PrecedenceDiagram("test_files/multipleCriticalPaths.txt");
+			PrecedenceDiagram pdm = new PrecedenceDiagram("test_files/hw3.txt");
 			pdm.generateTimes();
 			System.out.println(pdm.toString());
 			List<List<Task>> criticals = pdm.getCriticalPaths();
